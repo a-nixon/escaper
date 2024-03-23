@@ -2,9 +2,34 @@
 #include <iomanip>
 #include <iostream>
 
+void showHelp(int status){
+	//TODO
+	exit(status);
+}
 int main(int argc, char** argv){
+	//Parse options
 	bool showBytes = false;
-	if(argc > 1) if(strcmp(argv[1], "-b") == 0) showBytes = true;
+	bool breakLines = true;
+	for(int i = 1; i < argc; ++i){
+		if(argv[i][0] != '-') showHelp(1);
+		switch(argv[i][1]){
+			case 'b':
+				showBytes = true;
+				break;
+			case 'n':
+				breakLines = false;
+				break;
+			case 'h':
+				showHelp(0);
+				break; //Unneccessary
+			case '\0':
+				std::cout << ":3" << std::endl;
+				return 0;
+			default:
+				showHelp(1);
+				break; //Unneccessary
+		}
+	}
 	std::streambuf *buffer;
 	buffer = std::cin.rdbuf();
 	char c;
@@ -16,7 +41,7 @@ int main(int argc, char** argv){
 				break;
 			case '\n':
 				std::cout << "\\n";
-				if(!showBytes) std::cout << '\n';
+				if(!showBytes && breakLines) std::cout << '\n';
 				break;
 			case '\a':
 				std::cout << "\\a";
