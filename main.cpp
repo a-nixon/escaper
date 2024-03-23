@@ -1,11 +1,16 @@
-#include <cstring>
 #include <iomanip>
 #include <iostream>
 
-void showHelp(int status){
+/*
+ * Prints the help text then exits with exit code _status_.
+ */
+void showHelp(int _status_){
 	//TODO
-	exit(status);
+	exit(_status_);
 }
+/*
+ * The main function...
+ */
 int main(int argc, char** argv){
 	//Parse options
 	bool showBytes = false;
@@ -30,12 +35,13 @@ int main(int argc, char** argv){
 				break; //Unneccessary
 		}
 	}
+	//Read and reprint
 	std::streambuf *buffer;
 	buffer = std::cin.rdbuf();
 	char c;
 	while((c = buffer->sbumpc()) != EOF){
 		if(showBytes) std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)c << '\t';
-		switch(c){
+		switch(c){ //Escape non-printing characters.
 			case '\e':
 				std::cout << "\\e";
 				break;
@@ -61,12 +67,12 @@ int main(int argc, char** argv){
 			case '\v':
 				std::cout << "\\v";
 				break;
-			default:
+			default: //Assume printing character and print.
 				std::cout << c;
 			break;
 		}
 		if(showBytes) std::cout << '\n';
 	}
-	std::cout << "^D" << std::endl;
+	std::cout << "^D" << std::endl; //Not needed, could be removed..
 	return 0;
 }
