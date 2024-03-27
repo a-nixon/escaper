@@ -136,17 +136,21 @@ int main(int argc, char** argv){
 				else std::cout << "\\v";
 				break;
 			default: //Assume printing character and print.
-				if((c & LMB) != 0){
-					if(unicodeCount == 0){
-						unsigned int i = 0;
-						while((c & (LMB >> ++i)) != 0){}
-						unicodeCount = i;
-						std::cout << unicodeCount-- << " byte UTF sequence."; 
+				if(showBytes || showDec){
+					if((c & LMB) != 0){
+						if(unicodeCount == 0){
+							unsigned int i = 0;
+							while((c & (LMB >> ++i)) != 0){}
+							unicodeCount = i;
+							std::cout << unicodeCount-- << " byte UTF sequence."; 
+						}else{
+							--unicodeCount;
+							std::cout << "unicode byte";
+							//if(showBytes) printHex(c & 0b00111111);
+							//if(showDec) printDec(c & 0b00111111);
+						}
 					}else{
-						--unicodeCount;
-						std::cout << "unicode byte";
-						//if(showBytes) printHex(c & 0b00111111);
-						//if(showDec) printDec(c & 0b00111111);
+						std::cout << c;
 					}
 				}else{
 					std::cout << c;
