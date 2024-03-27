@@ -1,7 +1,8 @@
-#include <iomanip>
 #include <iostream>
 
 #define NAME "escaper"
+//#define LMB ~(~0U >> 1)
+#define LMB 0b10000000
 
 /*
  * THe default color to use when coloring output.
@@ -26,6 +27,16 @@ void showHelp(int _status_){ //Needs to be better.
 			<< "-u\tDisables colored output."
 			<< std::endl;
 	exit(_status_);
+}
+void printHex(unsigned char c){
+	static char buffer[3];
+	sprintf(buffer, "%02X", c);
+	std::cout << buffer << '\t';
+}
+void printDec(unsigned char c){
+	static char buffer[4];
+	sprintf(buffer, "%03d", c);
+	std::cout << buffer << '\t';
 }
 /*
  * The main function...
@@ -77,17 +88,18 @@ int main(int argc, char** argv){
 	char hrByteBuffer[8]; //byte in human readable format.
 	std::streambuf *StreamBuffer;
 	StreamBuffer = std::cin.rdbuf();
-	char c;
-	while((c = StreamBuffer->sbumpc()) != EOF){
+	unsigned char c;
+	int tmp;
+	unsigned int unicodeCount;
+	while((tmp = StreamBuffer->sbumpc()) != EOF){
+		c = tmp;
 		//if(showBytes) std::cout << std::setw(2) << std::setfill('0') << std::hex << (unsigned int)c << '\t';
 		//if(showDec) std::cout << std::dec << ((unsigned int)c) << '\t';
 		if(showBytes){
-			sprintf(hrByteBuffer, "%02X", (c<0?(unsigned char)c:c));
-			std::cout << hrByteBuffer << '\t';
+			printHex(c);
 		}
 		if(showDec){
-			sprintf(hrByteBuffer, "%03d", (c<0?(unsigned char)c:c));
-			std::cout << hrByteBuffer << '\t';
+			printDec(c);
 		}
 		switch(c){ //Escape non-printing characters.
 			case '\e': //ESC
@@ -124,7 +136,21 @@ int main(int argc, char** argv){
 				else std::cout << "\\v";
 				break;
 			default: //Assume printing character and print.
-				std::cout << c;
+				if((c & LMB) != 0){
+					if(unicodeCount == 0){
+						unsigned int i = 0;
+						while((c & (LMB >> ++i)) != 0){}
+						unicodeCount = i;
+						std::cout << unicodeCount-- << " byte UTF sequence."; 
+					}else{
+						--unicodeCount;
+						std::cout << "unicode byte";
+						//if(showBytes) printHex(c & 0b00111111);
+						//if(showDec) printDec(c & 0b00111111);
+					}
+				}else{
+					std::cout << c;
+				}
 			break;
 		}
 		if(showBytes || showDec) std::cout << '\n';
