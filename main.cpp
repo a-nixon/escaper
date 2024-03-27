@@ -86,12 +86,13 @@ int main(int argc, char** argv){
 	}
 	//Read and reprint
 	char hrByteBuffer[8]; //byte in human readable format.
-	std::streambuf *StreamBuffer;
-	StreamBuffer = std::cin.rdbuf();
+	char unicodeBuffer[4];
+	std::streambuf *streamBuffer;
+	streamBuffer = std::cin.rdbuf();
 	unsigned char c;
 	int tmp;
 	unsigned int unicodeCount;
-	while((tmp = StreamBuffer->sbumpc()) != EOF){
+	while((tmp = streamBuffer->sbumpc()) != EOF){
 		c = tmp;
 		//if(showBytes) std::cout << std::setw(2) << std::setfill('0') << std::hex << (unsigned int)c << '\t';
 		//if(showDec) std::cout << std::dec << ((unsigned int)c) << '\t';
@@ -142,7 +143,11 @@ int main(int argc, char** argv){
 							unsigned int i = 0;
 							while((c & (LMB >> ++i)) != 0){}
 							unicodeCount = i;
-							std::cout << unicodeCount-- << " byte UTF sequence."; 
+							std::cout << unicodeCount-- << " byte UTF sequence. "; 
+							streamBuffer->sgetn(unicodeBuffer, i-1);
+							unicodeBuffer[i-1] = '\0';
+							std::cout << c << unicodeBuffer;
+							for(int j = i-2; j >= 0; --j) streamBuffer->sputbackc(unicodeBuffer[j]);
 						}else{
 							--unicodeCount;
 							std::cout << "unicode byte";
