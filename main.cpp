@@ -20,6 +20,7 @@ void showHelp(int _status_){ //Needs to be better.
 			<< NAME " reads from stdin and escapes special characters before writing to stdout.\n\n"
 			<< "-h\tShow this help text.\n"
 			<< "-b\tShows the byte value (in hex) for each character.\n"
+			<< "-d\tShows the byte value (in decimal) for each character.\n"
 			<< "-n\tDisables line breaks.\n"
 			<< "-c\tColors special characters. Optionally followed by a color sequence.\n"
 			<< "-u\tDisables colored output."
@@ -32,7 +33,7 @@ void showHelp(int _status_){ //Needs to be better.
 int main(int argc, char** argv){
 	//Options
 	char* color = const_cast<char*>(defaultRed);
-	bool showBytes = false, breakLines = true, colored;
+	bool showBytes = false, showDec = false, breakLines = true, colored;
 
 	//Check output destination
 	//TODO
@@ -43,6 +44,9 @@ int main(int argc, char** argv){
 		switch(argv[i][1]){
 			case 'b':
 				showBytes = true;
+				break;
+			case 'd':
+				showDec = true;
 				break;
 			case 'n':
 				breakLines = false;
@@ -70,11 +74,21 @@ int main(int argc, char** argv){
 		}
 	}
 	//Read and reprint
-	std::streambuf *buffer;
-	buffer = std::cin.rdbuf();
+	char hrByteBuffer[8]; //byte in human readable format.
+	std::streambuf *StreamBuffer;
+	StreamBuffer = std::cin.rdbuf();
 	char c;
-	while((c = buffer->sbumpc()) != EOF){
-		if(showBytes) std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)c << '\t';
+	while((c = StreamBuffer->sbumpc()) != EOF){
+		//if(showBytes) std::cout << std::setw(2) << std::setfill('0') << std::hex << (unsigned int)c << '\t';
+		//if(showDec) std::cout << std::dec << ((unsigned int)c) << '\t';
+		if(showBytes){
+			sprintf(hrByteBuffer, "%02X", (c<0?(unsigned char)c:c));
+			std::cout << hrByteBuffer << '\t';
+		}
+		if(showDec){
+			sprintf(hrByteBuffer, "%03d", (c<0?(unsigned char)c:c));
+			std::cout << hrByteBuffer << '\t';
+		}
 		switch(c){ //Escape non-printing characters.
 			case '\e': //ESC
 				if(colored) std::cout << "\e[" << color << "\\e" << colorReset;
@@ -113,7 +127,7 @@ int main(int argc, char** argv){
 				std::cout << c;
 			break;
 		}
-		if(showBytes) std::cout << '\n';
+		if(showBytes || showDec) std::cout << '\n';
 	}
 	std::cout << "^D" << std::endl; //Not needed, could be removed..
 	return 0;
