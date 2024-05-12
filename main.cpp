@@ -1,11 +1,11 @@
 #include <iostream>
 
 #define NAME "escaper"
-//#define LMB ~(~0U >> 1)
+//Leftmost bit used by UTF8. USed to identify unicode bytes.
 #define LMB 0b10000000
 
 /*
- * THe default color to use when coloring output.
+ * The default color to use when coloring output.
  */
 const char* defaultRed = "31m";
 /*
@@ -28,11 +28,17 @@ void showHelp(int _status_){ //Needs to be better.
 			<< std::endl;
 	exit(_status_);
 }
+/*
+ * Prints the numerical value of the char c in hexadecimal notation.
+ */
 void printHex(unsigned char c){
 	static char buffer[3];
 	sprintf(buffer, "%02X", c);
 	std::cout << buffer << '\t';
 }
+/*
+ * Prints the numerical value of the char c in decimal notation.
+ */
 void printDec(unsigned char c){
 	static char buffer[4];
 	sprintf(buffer, "%03d", c);
@@ -42,11 +48,11 @@ void printDec(unsigned char c){
  * The main function...
  */
 int main(int argc, char** argv){
-	//Options
+	//Option variables
 	char* color = const_cast<char*>(defaultRed);
 	bool showBytes = false, showDec = false, breakLines = true, colored;
 
-	//Check output destination
+	//Check output destination (set colored)
 	//TODO
 	
 	//Parse options
@@ -94,8 +100,6 @@ int main(int argc, char** argv){
 	unsigned int unicodeCount;
 	while((tmp = streamBuffer->sbumpc()) != EOF){
 		c = tmp;
-		//if(showBytes) std::cout << std::setw(2) << std::setfill('0') << std::hex << (unsigned int)c << '\t';
-		//if(showDec) std::cout << std::dec << ((unsigned int)c) << '\t';
 		if(showBytes){
 			printHex(c);
 		}
@@ -143,7 +147,7 @@ int main(int argc, char** argv){
 							unsigned int i = 0;
 							while((c & (LMB >> ++i)) != 0){}
 							unicodeCount = i;
-							std::cout << unicodeCount-- << " byte UTF sequence. "; 
+							std::cout << unicodeCount-- << " byte UTF sequence: "; 
 							streamBuffer->sgetn(unicodeBuffer, i-1);
 							unicodeBuffer[i-1] = '\0';
 							std::cout << c << unicodeBuffer;
@@ -151,8 +155,6 @@ int main(int argc, char** argv){
 						}else{
 							--unicodeCount;
 							std::cout << "unicode byte";
-							//if(showBytes) printHex(c & 0b00111111);
-							//if(showDec) printDec(c & 0b00111111);
 						}
 					}else{
 						std::cout << c;
